@@ -31,6 +31,9 @@ import java.util.Map;
 
 /**
  * 京东 净水器、饮水机 DSR爬取
+ * 遍历净水品牌  净水器(https://list.jd.com/list.html?cat=737,738,898)   饮水机(https://list.jd.com/list.html?cat=737,738,750)
+ * 搜索并过滤 品牌名+净水+旗舰店，不包含 自营、专营店、专卖店 , 替换url中 index 为 shopLevel
+ * 访问shopLevel页面,循环获取dsr值
  * Created by xin on 2019/01/10.
  */
 public class JdJingShui {
