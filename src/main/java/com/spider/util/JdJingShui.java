@@ -10,6 +10,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.common.collect.Maps;
 import com.spider.util.domain.JdBrand;
+import com.spider.util.util.Configuration;
+import com.spider.util.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
@@ -39,9 +41,6 @@ import java.util.Map;
 public class JdJingShui {
 
     static Logger log = Logger.getLogger(Alibaba.class);
-    static String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    static String CONNECTION_URL = "jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=UTF-8";
-    static Connection con = null;
     static WebClient wc = null;
     static String _p = "&sort=sort_rank_asc&trans=1&md=1&my=list_brand";
     static String yinshui_url = "https://list.jd.com/list.html?cat=737,738,898"; //净水器
@@ -90,12 +89,15 @@ public class JdJingShui {
     public void save() throws Exception {
         log.info("save...");
         String now = "'" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "',"; //当前时间
-        String insert_sql = "INSERT into jddsr(created_date,name,shop_name,shop_url,filter_url,value,trend) VALUES (";
+        String insert_sql = "INSERT into jddsr(created_date,brand_name,shop_name,shop_url,filter_url,value,trend) VALUES (";
+        Connection con = null;
         PreparedStatement ps = null;
         ResultSet st = null;
         try {
-            Class.forName(JDBC_DRIVER);
-            con = DriverManager.getConnection(CONNECTION_URL, "root", "10355");
+            Configuration conf = new Configuration(Properties.mysql_url.getValue(), Properties.mysql_driver.getValue(),
+                    Properties.mysql_user.getValue(), Properties.mysql_pwd.getValue());
+            Class.forName(conf.getConnectionDriver());
+            con = DriverManager.getConnection(conf.getConnectionUrl(), conf.getUsername(), conf.getPassword());
             int num = 1;
             for(Map.Entry<String, JdBrand> entry: brands.entrySet()) {
                 JdBrand brand = entry.getValue();
@@ -223,8 +225,8 @@ public class JdJingShui {
                 jdBrand.setValue(dsr);
                 if(spans.get(0).attributes().get("class").equals("level-text-green")){
                     jdBrand.setTrend("低"); //低
-                }else{
-                    jdBrand.setTrend("高"); //高
+                }else if(spans.get(0).attributes().get("class").equals("level-text-red")){
+                    jdBrand.setTrend(spans.get(1).html()); //高、中
                 }
             } else { //与同行业相比无差别
                 jdBrand.setValue(null);
