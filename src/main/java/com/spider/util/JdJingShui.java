@@ -103,12 +103,12 @@ public class JdJingShui {
                 JdBrand brand = entry.getValue();
                 log.info("第" + num + "个：" + brand.getName());
                 brand = filterBrand(brand);
-                num++;
                 try {
                     //insert
                     ps = con.prepareStatement(insert_sql + now + brand.toString() + ")");
                     ps.execute();
                 }catch (Exception e){}
+                num++;
             }
             log.info("save success ：" + brands.size());
         } catch (Exception e) {
